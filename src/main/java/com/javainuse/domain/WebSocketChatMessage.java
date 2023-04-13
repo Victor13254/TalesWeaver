@@ -1,9 +1,10 @@
 package com.javainuse.domain;
 
 public class WebSocketChatMessage {
-    private String type;
-    private String content;
-    private String sender;
+    private String type; //Entra o sale del chat
+    private String content; //Mensaje
+    private String sender; //Emisor
+
 
     public String getType() {
         return type;

@@ -6,13 +6,15 @@ document.querySelector('#dialogueForm').addEventListener('submit', sendMessage, 
 var stompClient = null;
 var name = null;
 
+//conexion
 function connect(event) {
     name = document.querySelector('#name').value.trim();
 
     if (name) {
-        document.querySelector('#welcome-page').classList.add('hidden');
-        document.querySelector('#dialogue-page').classList.remove('hidden');
+        document.querySelector('#welcome-page').classList.add('hidden'); //oculta el login
+        document.querySelector('#dialogue-page').classList.remove('hidden'); //muestra el chat
 
+        //se hace una conexion BiDir por STOMP
         var socket = new SockJS('/websocketApp');
         stompClient = Stomp.over(socket);
 
@@ -22,6 +24,7 @@ function connect(event) {
 }
 
 function connectionSuccess() {
+    //Se sucribe al canal y envia mensaje de entrada
     stompClient.subscribe('/topic/javainuse', onMessageReceived);
 
     stompClient.send("/app/chat.newUser", {}, JSON.stringify({
@@ -32,20 +35,21 @@ function connectionSuccess() {
 }
 
 function sendMessage(event) {
-    var messageContent = document.querySelector('#chatMessage').value.trim();
+    //envio de mensajes
+    var messageContent = document.querySelector('#chatMessage').value.trim(); //seleccion del mensaje
 
-    if (messageContent && stompClient) {
-        var chatMessage = {
+    if (messageContent && stompClient) { //verifica si existe un mensaje y una conexion
+        var chatMessage = { //se definen los componentes de la variable
             sender : name,
             content : document.querySelector('#chatMessage').value,
             type : 'CHAT'
         };
 
         stompClient.send("/app/chat.sendMessage", {}, JSON
-            .stringify(chatMessage));
-        document.querySelector('#chatMessage').value = '';
+            .stringify(chatMessage)); //se envia mensaje a traves de STOMP en formato JSON
+        document.querySelector('#chatMessage').value = ''; // borra el mensaje del formato
     }
-    event.preventDefault();
+    event.preventDefault(); //Evita que se realize el evento default
 }
 
 function onMessageReceived(payload) {
@@ -53,13 +57,14 @@ function onMessageReceived(payload) {
 
     var messageElement = document.createElement('li');
 
-    if (message.type === 'newUser') {
+    //se definen mensajes
+    if (message.type === 'newUser') {//entrada
         messageElement.classList.add('event-data');
         message.content = message.sender + ' entro al chat';
-    } else if (message.type === 'Leave') {
+    } else if (message.type === 'Leave') {//salida
         messageElement.classList.add('event-data');
         message.content = message.sender + ' salio del chat';
-    } else {
+    } else { //se recibe mensajes
         messageElement.classList.add('message-data');
 
         var element = document.createElement('i');
